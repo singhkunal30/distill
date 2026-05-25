@@ -102,9 +102,15 @@ with a passcode.
 
 ## Status
 
-- ✅ **Phase 1 — Foundation** (this commit): library, importers,
-  settings, cost guardrails, mobile shell, PWA scaffold, onboarding.
-- ⏳ **Phases 2–3**: summaries + audio (build fully).
+- ✅ **Phase 1 — Foundation**: library, importers, settings, cost
+  guardrails, mobile shell, PWA scaffold, onboarding.
+- ✅ **Phase 2 — Summaries**: in-process job runner, Anthropic provider
+  wired through the cost guard, five summary formats with chunked
+  map/reduce, demo-mode path using seed fixtures, premium reader UI
+  (light/sepia/dark, font scale, zen mode, keyboard shortcuts),
+  per-section edit + regenerate, version history, failed-jobs panel,
+  cost-confirmation dialog.
+- ⏳ **Phase 3**: audio (build fully).
 - 📋 **Phases 4–7**: scaffolded; see `TODO.md` for the punch list.
 
 ## Brand

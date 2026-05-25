@@ -1,8 +1,8 @@
 import EPub from 'epub2';
 import { JSDOM } from 'jsdom';
-import { writeFile, mkdtemp, unlink, rm } from 'node:fs/promises';
-import { tmpdir } from 'node:os';
-import path from 'node:path';
+import { writeFile, mkdtemp, rm } from 'fs/promises';
+import { tmpdir } from 'os';
+import path from 'path';
 
 export type ExtractedEpub = {
   title: string | null;

@@ -1,7 +1,9 @@
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
-import { ArrowLeft, BookOpen, Hash, Headphones, Sparkles, Star } from 'lucide-react';
+import { ArrowLeft, BookOpen, Hash, Headphones, Star } from 'lucide-react';
 import { getBook } from '@/features/books/queries';
+import { listSummaries } from '@/features/summaries/queries';
+import { getSettings } from '@/lib/settings';
 import { BookCover } from '@/features/books/book-cover';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -9,17 +11,24 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { parseAuthors } from '@/lib/utils';
 import { STATUS_LABEL, SOURCE_LABEL } from '@/features/books/types';
 import { BookStatusControl } from '@/features/books/book-status-control';
+import { DistillDialog } from '@/features/summaries/distill-dialog';
+import { JobProgress } from '@/features/summaries/job-progress';
+import { FORMAT_LABEL, FORMAT_DESCRIPTION, type SummaryFormat } from '@/features/summaries/types';
 
 export const dynamic = 'force-dynamic';
 
 export default async function BookPage({ params }: { params: { id: string } }) {
-  const book = await getBook(params.id);
+  const [book, settings] = await Promise.all([getBook(params.id), getSettings()]);
   if (!book) notFound();
+  const summaries = await listSummaries(book.id);
 
   const authors = parseAuthors(book.authors);
   const sourceLabel =
     SOURCE_LABEL[book.sourceType as keyof typeof SOURCE_LABEL] ?? book.sourceType;
   const statusLabel = STATUS_LABEL[book.status as keyof typeof STATUS_LABEL] ?? book.status;
+
+  const haveFormats = new Set(summaries.map((s) => s.format));
+  const allFormats: SummaryFormat[] = ['blink', 'insights', 'detailed', 'tldr', 'applications'];
 
   return (
     <div>
@@ -64,10 +73,15 @@ export default async function BookPage({ params }: { params: { id: string } }) {
 
           <div className="mt-6 flex flex-wrap items-center gap-2">
             <BookStatusControl id={book.id} status={book.status as never} />
-            <Button variant="outline" size="sm" disabled>
-              <Sparkles className="h-3.5 w-3.5" />
-              Distill (Phase 2)
-            </Button>
+            <DistillDialog
+              bookId={book.id}
+              defaults={{
+                format: settings.defaultSummaryFormat,
+                tone: settings.defaultSummaryTone,
+                length: settings.defaultSummaryLength,
+                audience: settings.defaultSummaryAudience,
+              }}
+            />
             <Button variant="outline" size="sm" disabled>
               <Headphones className="h-3.5 w-3.5" />
               Listen (Phase 3)
@@ -75,6 +89,67 @@ export default async function BookPage({ params }: { params: { id: string } }) {
           </div>
         </div>
       </div>
+
+      <section className="mt-8">
+        <JobProgress bookId={book.id} />
+      </section>
+
+      <section className="mt-8">
+        <h2 className="mb-3 font-serif text-lg font-semibold">Distillations</h2>
+        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+          {allFormats.map((f) => {
+            const existing = summaries.find((s) => s.format === f);
+            return (
+              <Card key={f} className={existing ? '' : 'border-dashed bg-card/50'}>
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-sm">{FORMAT_LABEL[f]}</CardTitle>
+                  <CardDescription className="text-xs">
+                    {FORMAT_DESCRIPTION[f]}
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="flex items-end justify-between pt-0">
+                  {existing ? (
+                    <>
+                      <p className="text-xs text-muted-foreground">
+                        {existing._count.sections} sections
+                        {existing.generatedAt
+                          ? ` · ${new Date(existing.generatedAt).toLocaleDateString()}`
+                          : ''}
+                      </p>
+                      <Button asChild size="sm" variant="default">
+                        <Link href={`/read/${book.id}/${f}`}>Read</Link>
+                      </Button>
+                    </>
+                  ) : (
+                    <>
+                      <p className="text-xs text-muted-foreground">Not generated yet</p>
+                      <DistillDialog
+                        bookId={book.id}
+                        defaults={{
+                          format: f,
+                          tone: settings.defaultSummaryTone,
+                          length: settings.defaultSummaryLength,
+                          audience: settings.defaultSummaryAudience,
+                        }}
+                        trigger={
+                          <Button size="sm" variant="outline">
+                            Distill
+                          </Button>
+                        }
+                      />
+                    </>
+                  )}
+                </CardContent>
+              </Card>
+            );
+          })}
+        </div>
+        {haveFormats.size === 0 ? (
+          <p className="mt-3 text-xs text-muted-foreground">
+            Tip: in demo mode, every format is free and uses pre-cached fixtures.
+          </p>
+        ) : null}
+      </section>
 
       <section className="mt-10 grid gap-4 md:grid-cols-2">
         <Card>
@@ -144,16 +219,6 @@ export default async function BookPage({ params }: { params: { id: string } }) {
             </dl>
           </CardContent>
         </Card>
-      </section>
-
-      <section className="mt-10">
-        <h2 className="mb-2 font-serif text-lg font-semibold">Coming in later phases</h2>
-        <ul className="grid gap-2 text-sm text-muted-foreground sm:grid-cols-2">
-          <li>• Summaries (Phase 2) — blink, insights, detailed, TL;DR, applications.</li>
-          <li>• Audio narration (Phase 3) — TTS pipeline with playback sync.</li>
-          <li>• Highlights & flashcards (Phase 4) — SM-2 spaced repetition.</li>
-          <li>• Semantic chat (Phase 5) — Ask-the-book grounded in RAG.</li>
-        </ul>
       </section>
     </div>
   );

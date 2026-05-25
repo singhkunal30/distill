@@ -6,11 +6,20 @@ import { SettingsForm } from '@/features/settings/settings-form';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { formatUsd } from '@/lib/utils';
+import { prisma } from '@/lib/db';
+import { FailedJobsPanel } from '@/features/jobs/failed-jobs-panel';
 
 export const dynamic = 'force-dynamic';
 
 export default async function SettingsPage() {
-  const [settings, budget] = await Promise.all([getSettings(), getBudgetStatus()]);
+  const [settings, budget, failedJobs] = await Promise.all([
+    getSettings(),
+    getBudgetStatus(),
+    prisma.failedJob.findMany({
+      orderBy: { failedAt: 'desc' },
+      take: 20,
+    }),
+  ]);
 
   const providers = {
     anthropic: hasAnthropicKey(),
@@ -65,6 +74,17 @@ export default async function SettingsPage() {
         </Card>
 
         <SettingsForm settings={settings} />
+
+        <FailedJobsPanel
+          jobs={failedJobs.map((j) => ({
+            id: j.id,
+            kind: j.kind,
+            error: j.error,
+            attempts: j.attempts,
+            failedAt: j.failedAt,
+            retriedJobId: j.retriedJobId,
+          }))}
+        />
       </div>
     </div>
   );
