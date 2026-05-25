@@ -41,3 +41,7 @@ yarn-error.log*
 
 # Vitest
 coverage
+
+# tsc incremental cache
+tsconfig.tsbuildinfo
+*.tsbuildinfo
