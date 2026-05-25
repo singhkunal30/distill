@@ -60,25 +60,49 @@ onboarding. See README for what shipped.
 
 ---
 
-## ⏳ Phase 3 — Audio (build fully)
+## ✅ Phase 3 — Audio (DONE)
 
-- [ ] **TTS providers**: `lib/ai/providers/tts/openai.ts` and
-  `…/elevenlabs.ts`. Same `withCostGuard` wrapper. Write MP3 to
-  `public/audio/<sha256(text+voice+model)>.mp3`. Content-addressed so
-  re-narration of the same section returns the existing track.
-- [ ] **TTS handler**: register in `lib/jobs/runner.ts` HANDLERS map.
-  Step: enumerate sections, narrate each, write AudioTrack rows.
-- [ ] **"Listen" button** on book/reader pages enqueues a `tts` job
-  for the visible summary.
-- [ ] **Player** (`features/audio/player.tsx`): Howler.js, persistent
-  on mobile (bottom-sheet), with play/pause, ±15s, speed 0.5–3x, queue,
-  sleep timer.
-- [ ] **PlaybackPosition** writes on `timeupdate` (debounced ~5s).
-- [ ] **Karaoke sync (lite)**: when timings are present in
-  `AudioTrack.timings`, highlight the current sentence in the reader.
-- [ ] **Offline audio cache**: register the audio URL with Serwist's
-  precache list (Phase 7 prereq), or download-and-store-in-IndexedDB on
-  demand via Dexie.
+- TTS providers: `lib/ai/providers/tts/openai.ts` and `…/elevenlabs.ts`,
+  both behind a common `TTSProvider` interface (`tts/types.ts`) and
+  wrapped in `withCostGuard`. Selection in `tts/index.ts` reads from
+  Settings. ElevenLabs uses `/with-timestamps` so its tracks carry
+  word-level alignment for karaoke sync.
+- MP3s are content-addressed by `sha256(provider|model|voice|text)`,
+  written to `public/audio/<hash>.mp3`. Re-narration of identical
+  content is free.
+- `runTtsJob` (`lib/jobs/handlers/tts.ts`): per-section narration with
+  resumability via `completedSteps` (skips already-narrated sections,
+  skips on cache hit via the AudioTrack unique constraint).
+- Demo mode: TTS jobs short-circuit and return a "browser TTS"
+  progress note. The client-side player drives `window.speechSynthesis`
+  directly using the section's plain text — no API spend, works on
+  iOS/Android.
+- `/api/audio/queue?summaryId=…` resolves a flat queue: each section
+  either has a `url` (MP3) or `text` (browser-TTS fallback), plus
+  word `timings` if available and saved playback position per track.
+- Player: Zustand store + invisible `AudioEngine` driving Howler.js for
+  MP3 and `SpeechSynthesisUtterance` for browser-TTS. Mini-bar pinned
+  above the mobile nav (or the desktop bottom), tappable to expand
+  into a full Spotify-style sheet with: speed 0.75–3x, ±15s seek,
+  prev/next, sleep timer (5/15/30/60 min), queue list, karaoke
+  highlight when timings exist.
+- PlaybackPosition autosaved every 5s + on track change.
+- Listen button is wired on the book detail page and in the reader
+  header. If every section already has a track (or demo mode has
+  text), it queues immediately; otherwise it shows the cost
+  confirmation and enqueues a TTS job, polling until tracks land.
+
+### Phase 3 polish carryover
+
+- [ ] **Offline audio cache** with Serwist (lands in Phase 7). The
+  audio URLs (`/audio/*.mp3`) are content-addressed so a `CacheFirst`
+  strategy in the SW is trivial.
+- [ ] **Per-summary "narrate all" status** on the book page (e.g.
+  "5 of 12 sections narrated"). Today the player polls; the book page
+  doesn't show progress unless the JobProgress card is visible.
+- [ ] **OpenAI TTS timings**: OpenAI doesn't expose alignment from
+  `audio.speech.create`. To support karaoke for OpenAI, run a Whisper
+  pass on the MP3 and stash word timings. Defer until needed.
 
 **STOP** after Phase 3 — confirm with the user before continuing.
 

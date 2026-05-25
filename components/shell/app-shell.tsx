@@ -10,6 +10,7 @@ import {
   TrendingUp,
 } from 'lucide-react';
 import { DistillWordmark } from '@/components/brand/wordmark';
+import { AudioBar } from '@/features/audio/audio-bar';
 import { cn } from '@/lib/utils';
 
 const NAV = [
@@ -78,11 +79,13 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         </Link>
       </header>
 
-      <main className="md:pl-60 pb-20 md:pb-0">
+      <main className="md:pl-60 pb-36 md:pb-20">
         <div className="mx-auto w-full max-w-5xl px-4 py-6 md:px-8 md:py-10">
           {children}
         </div>
       </main>
+
+      <AudioBar />
 
       {/* Mobile bottom nav */}
       <nav className="fixed inset-x-0 bottom-0 z-20 grid h-16 grid-cols-5 border-t bg-background/95 backdrop-blur md:hidden">

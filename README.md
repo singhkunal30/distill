@@ -110,7 +110,13 @@ with a passcode.
   (light/sepia/dark, font scale, zen mode, keyboard shortcuts),
   per-section edit + regenerate, version history, failed-jobs panel,
   cost-confirmation dialog.
-- ⏳ **Phase 3**: audio (build fully).
+- ✅ **Phase 3 — Audio**: OpenAI + ElevenLabs TTS providers behind one
+  interface, content-addressed MP3 cache (`/public/audio/*.mp3`),
+  Howler-based player with a persistent mini-bar and full-screen
+  sheet, speed 0.75–3x, ±15s seek, queue, sleep timer, autosaved
+  position. ElevenLabs returns word timings for karaoke-style highlight.
+  **Demo mode uses the browser's SpeechSynthesis API** — no API spend,
+  works on iOS Safari and Android Chrome from "Add to Home Screen".
 - 📋 **Phases 4–7**: scaffolded; see `TODO.md` for the punch list.
 
 ## Brand

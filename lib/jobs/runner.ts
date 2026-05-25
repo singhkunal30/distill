@@ -2,11 +2,13 @@ import { prisma } from '@/lib/db';
 import type { JobContext, JobHandler, JobKind } from './types';
 import { runSummaryJob } from './handlers/summary';
 import { runSectionRegenerateJob } from './handlers/section-regenerate';
+import { runTtsJob } from './handlers/tts';
 
 const HANDLERS: Partial<Record<JobKind, JobHandler>> = {
   summary: runSummaryJob,
   section_regenerate: runSectionRegenerateJob,
-  // Other kinds (embedding, tts, quiz, flashcards, recommendation_index)
+  tts: runTtsJob,
+  // Other kinds (embedding, quiz, flashcards, recommendation_index)
   // arrive in later phases. The dispatcher errors loudly if asked for one.
 };
 

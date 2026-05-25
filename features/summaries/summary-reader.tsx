@@ -2,7 +2,7 @@
 
 import * as React from 'react';
 import Link from 'next/link';
-import { ArrowLeft, History, Headphones } from 'lucide-react';
+import { ArrowLeft, History } from 'lucide-react';
 import { ReaderProvider, ReaderControls, useReader } from './reader-controls';
 import { SummarySectionBlock } from './summary-section';
 import { Button } from '@/components/ui/button';
@@ -10,6 +10,7 @@ import { cn, parseAuthors } from '@/lib/utils';
 import { JobProgress } from './job-progress';
 import { VersionHistorySheet } from './version-history';
 import { FORMAT_LABEL } from './types';
+import { ListenButton } from '@/features/audio/listen-button';
 
 type Section = { id: string; position: number; heading: string; body: string };
 
@@ -66,9 +67,7 @@ function Inner({ book, summary, versions }: Props) {
               <History className="h-4 w-4" />
             </Button>
           </VersionHistorySheet>
-          <Button variant="ghost" size="icon" aria-label="Listen (coming in Phase 3)" disabled>
-            <Headphones className="h-4 w-4" />
-          </Button>
+          <ListenButton summaryId={summary.id} variant="ghost" label="" />
           <ReaderControls />
         </div>
       </header>

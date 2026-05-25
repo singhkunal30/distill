@@ -14,6 +14,7 @@ import { BookStatusControl } from '@/features/books/book-status-control';
 import { DistillDialog } from '@/features/summaries/distill-dialog';
 import { JobProgress } from '@/features/summaries/job-progress';
 import { FORMAT_LABEL, FORMAT_DESCRIPTION, type SummaryFormat } from '@/features/summaries/types';
+import { ListenButton } from '@/features/audio/listen-button';
 
 export const dynamic = 'force-dynamic';
 
@@ -82,10 +83,14 @@ export default async function BookPage({ params }: { params: { id: string } }) {
                 audience: settings.defaultSummaryAudience,
               }}
             />
-            <Button variant="outline" size="sm" disabled>
-              <Headphones className="h-3.5 w-3.5" />
-              Listen (Phase 3)
-            </Button>
+            {summaries.length > 0 ? (
+              <ListenButton summaryId={summaries[0]!.id} label="Listen" />
+            ) : (
+              <Button variant="outline" size="sm" disabled>
+                <Headphones className="h-3.5 w-3.5" />
+                Listen
+              </Button>
+            )}
           </div>
         </div>
       </div>
