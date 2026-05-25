@@ -1,0 +1,447 @@
+// Distill — Prisma schema
+//
+// One schema, all phases. Tables for phases 4-7 exist from day one so
+// future code doesn't churn migrations. See prisma/SCHEMA.md for the
+// per-table explanation of intent and which phase activates each table.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// ─── Phase 1: Library ────────────────────────────────────────────
+
+model Book {
+  id            String   @id @default(cuid())
+  title         String
+  subtitle      String?
+  authors       String   // JSON array of author names
+  coverUrl      String?
+  description   String?  // From Open Library or user
+  publishedYear Int?
+  pageCount     Int?
+  isbn          String?
+  openLibraryId String?  // OLID or work key
+
+  // Source of the raw content used for summary generation.
+  // "manual" | "txt" | "md" | "epub" | "pdf" | "url" | "metadata-only"
+  sourceType    String   @default("metadata-only")
+  contentMd     String?  // Cleaned markdown body, if available
+  contentChars  Int?     // Approx char count, for cost estimation
+
+  // Reading workflow: "to_read" | "reading" | "finished" | "archived"
+  status        String   @default("to_read")
+  rating        Int?     // 1-5, nullable until rated
+  startedAt     DateTime?
+  finishedAt    DateTime?
+
+  // User-facing organization
+  genres        BookGenre[]
+  collections   CollectionBook[]
+  tags          BookTag[]
+
+  // Generated content
+  summaries     Summary[]
+  highlights    Highlight[]
+  notes         Note[]
+  flashcards    Flashcard[]
+  quizzes       Quiz[]
+  audioTracks   AudioTrack[]
+  chatSessions  ChatSession[]
+  playback      PlaybackPosition[]
+  jobs          GenerationJob[]
+
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@index([status])
+  @@index([createdAt])
+  @@index([title])
+}
+
+model Genre {
+  id    String      @id @default(cuid())
+  name  String      @unique
+  books BookGenre[]
+}
+
+model BookGenre {
+  bookId  String
+  genreId String
+  book    Book   @relation(fields: [bookId], references: [id], onDelete: Cascade)
+  genre   Genre  @relation(fields: [genreId], references: [id], onDelete: Cascade)
+
+  @@id([bookId, genreId])
+  @@index([genreId])
+}
+
+model Tag {
+  id         String       @id @default(cuid())
+  name       String       @unique
+  color      String?
+  books      BookTag[]
+  highlights HighlightTag[]
+}
+
+model BookTag {
+  bookId String
+  tagId  String
+  book   Book @relation(fields: [bookId], references: [id], onDelete: Cascade)
+  tag    Tag  @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  @@id([bookId, tagId])
+}
+
+model Collection {
+  id          String           @id @default(cuid())
+  name        String
+  description String?
+  books       CollectionBook[]
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+}
+
+model CollectionBook {
+  collectionId String
+  bookId       String
+  position     Int
+  collection   Collection @relation(fields: [collectionId], references: [id], onDelete: Cascade)
+  book         Book       @relation(fields: [bookId], references: [id], onDelete: Cascade)
+
+  @@id([collectionId, bookId])
+}
+
+// ─── Phase 2: Summaries ──────────────────────────────────────────
+
+model Summary {
+  id        String           @id @default(cuid())
+  bookId    String
+  book      Book             @relation(fields: [bookId], references: [id], onDelete: Cascade)
+
+  // "blink" | "insights" | "detailed" | "tldr" | "applications"
+  format    String
+  tone      String?          // "neutral" | "academic" | "conversational" | "punchy"
+  audience  String?          // "beginner" | "intermediate" | "expert"
+  length    String?          // "short" | "medium" | "long"
+
+  sections  SummarySection[]
+  versions  SummaryVersion[]
+
+  embedding String?          // JSON array, generated in Phase 5
+
+  // Generation provenance
+  modelUsed     String?
+  promptVersion String?
+  generatedAt   DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([bookId, format])
+  @@index([bookId])
+}
+
+model SummarySection {
+  id        String   @id @default(cuid())
+  summaryId String
+  summary   Summary  @relation(fields: [summaryId], references: [id], onDelete: Cascade)
+  position  Int
+  heading   String
+  body      String   // Markdown
+  // Per-section regeneration uses this hash to know what changed.
+  contentHash String?
+  embedding String?  // JSON array, generated in Phase 5
+
+  @@index([summaryId, position])
+}
+
+model SummaryVersion {
+  id        String   @id @default(cuid())
+  summaryId String
+  summary   Summary  @relation(fields: [summaryId], references: [id], onDelete: Cascade)
+  // Snapshot of sections as JSON at the moment of save.
+  snapshot  String
+  reason    String?
+  createdAt DateTime @default(now())
+
+  @@index([summaryId])
+}
+
+// ─── Phase 3: Audio ──────────────────────────────────────────────
+
+model AudioTrack {
+  id         String   @id @default(cuid())
+  bookId     String
+  book       Book     @relation(fields: [bookId], references: [id], onDelete: Cascade)
+
+  // What this audio narrates.
+  // "summary" | "section" | "highlight" | "flashcard"
+  scope      String
+  scopeId    String   // ID of the referenced Summary/SummarySection/etc.
+
+  provider   String   // "openai" | "elevenlabs"
+  voice      String
+  url        String   // /audio/<hash>.mp3 (local file)
+  durationMs Int
+  // Word-level timing JSON for karaoke-style sync, when available.
+  timings    String?
+
+  createdAt  DateTime @default(now())
+
+  @@unique([scope, scopeId, voice, provider])
+  @@index([bookId])
+}
+
+model PlaybackPosition {
+  id        String   @id @default(cuid())
+  bookId    String
+  book      Book     @relation(fields: [bookId], references: [id], onDelete: Cascade)
+  trackId   String
+  positionMs Int     @default(0)
+  speed     Float    @default(1.0)
+  updatedAt DateTime @updatedAt
+
+  @@unique([bookId, trackId])
+}
+
+// ─── Phase 4: Knowledge ──────────────────────────────────────────
+
+model Highlight {
+  id         String         @id @default(cuid())
+  bookId     String
+  book       Book           @relation(fields: [bookId], references: [id], onDelete: Cascade)
+  // Where in the book/summary it came from. Loose string so we can
+  // attach highlights to section ids or raw character ranges.
+  locator    String?
+  text       String
+  color      String?        // "yellow" | "blue" | "pink" | "green"
+  notes      Note[]
+  tags       HighlightTag[]
+  embedding  String?        // JSON array, generated in Phase 5
+  createdAt  DateTime       @default(now())
+
+  @@index([bookId])
+}
+
+model HighlightTag {
+  highlightId String
+  tagId       String
+  highlight   Highlight @relation(fields: [highlightId], references: [id], onDelete: Cascade)
+  tag         Tag       @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  @@id([highlightId, tagId])
+}
+
+model Note {
+  id          String     @id @default(cuid())
+  bookId      String
+  book        Book       @relation(fields: [bookId], references: [id], onDelete: Cascade)
+  highlightId String?
+  highlight   Highlight? @relation(fields: [highlightId], references: [id], onDelete: SetNull)
+  body        String     // Markdown / TipTap JSON
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+
+  @@index([bookId])
+}
+
+model Flashcard {
+  id         String   @id @default(cuid())
+  bookId     String
+  book       Book     @relation(fields: [bookId], references: [id], onDelete: Cascade)
+  front      String
+  back       String
+  source     String?  // "summary" | "highlight" | "manual"
+  sourceId   String?
+
+  // SM-2 spaced repetition state
+  ease       Float    @default(2.5)
+  intervalDays Int    @default(0)
+  repetitions Int     @default(0)
+  dueAt      DateTime @default(now())
+  lastReviewedAt DateTime?
+
+  reviews    Review[]
+  embedding  String?  // JSON array, generated in Phase 5
+  createdAt  DateTime @default(now())
+
+  @@index([bookId])
+  @@index([dueAt])
+}
+
+model Review {
+  id          String   @id @default(cuid())
+  flashcardId String
+  flashcard   Flashcard @relation(fields: [flashcardId], references: [id], onDelete: Cascade)
+  // 0-5 (Again, Hard, Good, Easy mapped to SM-2 quality)
+  quality     Int
+  intervalDays Int
+  easeAfter   Float
+  reviewedAt  DateTime @default(now())
+
+  @@index([flashcardId])
+}
+
+model Quiz {
+  id        String         @id @default(cuid())
+  bookId    String
+  book      Book           @relation(fields: [bookId], references: [id], onDelete: Cascade)
+  title     String
+  questions QuizQuestion[]
+  createdAt DateTime       @default(now())
+}
+
+model QuizQuestion {
+  id            String @id @default(cuid())
+  quizId        String
+  quiz          Quiz   @relation(fields: [quizId], references: [id], onDelete: Cascade)
+  // "multiple_choice" | "open_ended" | "matching"
+  kind          String
+  prompt        String
+  // For multiple_choice: JSON array of {text, correct}.
+  // For open_ended: JSON with model_answer.
+  payload       String
+  explanation   String?
+  position      Int
+
+  @@index([quizId, position])
+}
+
+// ─── Phase 5: Intelligence ───────────────────────────────────────
+
+model ChatSession {
+  id        String        @id @default(cuid())
+  bookId    String?
+  book      Book?         @relation(fields: [bookId], references: [id], onDelete: Cascade)
+  title     String        @default("New chat")
+  messages  ChatMessage[]
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
+}
+
+model ChatMessage {
+  id         String      @id @default(cuid())
+  sessionId  String
+  session    ChatSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  role       String      // "user" | "assistant" | "system"
+  content    String
+  // JSON array of {kind, refId, snippet} for RAG citations.
+  citations  String?
+  createdAt  DateTime    @default(now())
+
+  @@index([sessionId])
+}
+
+// ─── Phase 6: Habits / Stats ─────────────────────────────────────
+
+model ReadingEvent {
+  id        String   @id @default(cuid())
+  bookId    String?
+  // "open" | "read" | "listen" | "highlight" | "review" | "finish"
+  kind      String
+  // Free-form payload (e.g. minutes, words).
+  payload   String?
+  createdAt DateTime @default(now())
+
+  @@index([createdAt])
+  @@index([kind])
+}
+
+model Achievement {
+  id          String   @id @default(cuid())
+  slug        String   @unique
+  title       String
+  description String
+  icon        String?
+  unlockedAt  DateTime?
+}
+
+model Goal {
+  id        String   @id @default(cuid())
+  // "minutes_per_day" | "books_per_month" | "summaries_per_week"
+  kind      String   @unique
+  target    Int
+  updatedAt DateTime @updatedAt
+}
+
+// ─── Always-on infrastructure ────────────────────────────────────
+
+model Setting {
+  key       String   @id
+  value     String   // JSON-encoded
+  updatedAt DateTime @updatedAt
+}
+
+model ApiUsageLog {
+  id              String   @id @default(cuid())
+  provider        String   // "anthropic" | "openai" | "elevenlabs" | "openlibrary" | "local"
+  model           String
+  feature         String   // "summary" | "chat" | "embedding" | "tts" | "flashcard" | "quiz" | "metadata"
+  inputTokens     Int?
+  outputTokens    Int?
+  // Free-form units for non-LLM providers (e.g. TTS characters).
+  units           Int?
+  unitKind        String?  // "characters" | "seconds" | "requests"
+  estimatedUsd    Float
+  actualUsd       Float?
+  demoMode        Boolean  @default(false)
+  bookId          String?
+  jobId           String?
+  metadata        String?  // JSON
+  createdAt       DateTime @default(now())
+
+  @@index([createdAt])
+  @@index([provider, feature])
+  @@index([bookId])
+}
+
+model GenerationJob {
+  id           String   @id @default(cuid())
+  // "summary" | "embedding" | "tts" | "quiz" | "flashcards" | "recommendation_index"
+  kind         String
+  // "pending" | "generating" | "completed" | "failed" | "paused"
+  status       String   @default("pending")
+  bookId       String?
+  book         Book?    @relation(fields: [bookId], references: [id], onDelete: Cascade)
+  // JSON params for the job (format, length, tone, etc.).
+  params       String
+  // Sub-step progress; the worker writes here so resumption is exact.
+  progress     Int      @default(0)   // 0-100
+  progressNote String?
+  // JSON array of completed sub-step ids; used for resume.
+  completedSteps String?
+  attempts     Int      @default(0)
+  estimatedUsd Float?
+  actualUsd    Float?
+  error        String?
+  startedAt    DateTime?
+  finishedAt   DateTime?
+  // Lease timestamp; the worker holds a row by stamping this.
+  leasedAt     DateTime?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@index([status, kind])
+  @@index([bookId])
+  @@index([leasedAt])
+}
+
+model FailedJob {
+  id          String   @id @default(cuid())
+  // Snapshot of the GenerationJob row at failure time so retries can
+  // resurrect even if the original row was deleted.
+  originalJobId String?
+  kind        String
+  params      String
+  error       String
+  attempts    Int
+  failedAt    DateTime @default(now())
+  // Set once a retry is enqueued from this row.
+  retriedJobId String?
+
+  @@index([failedAt])
+}
