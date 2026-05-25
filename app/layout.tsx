@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from 'next';
 import './globals.css';
 import { Providers } from './providers';
 import { ThemeScript } from '@/components/theme/theme-script';
+import { RegisterSW } from '@/components/pwa/register-sw';
 
 export const metadata: Metadata = {
   title: {
@@ -49,7 +50,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           } as React.CSSProperties
         }
       >
-        <Providers>{children}</Providers>
+        <Providers>
+          {children}
+          <RegisterSW />
+        </Providers>
       </body>
     </html>
   );

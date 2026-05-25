@@ -42,7 +42,7 @@ export async function extractEpub(bytes: Uint8Array): Promise<ExtractedEpub> {
       if (!chapter.id) continue;
       try {
         const html = await new Promise<string>((resolve, reject) => {
-          epub.getChapter(chapter.id!, (err, text) =>
+          epub.getChapter(chapter.id!, (err: Error | null, text?: string) =>
             err ? reject(err) : resolve(text ?? ''),
           );
         });

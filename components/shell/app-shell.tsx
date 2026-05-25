@@ -3,7 +3,6 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import {
-  BookMarked,
   Home,
   Library,
   Settings,
@@ -110,37 +109,3 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   );
 }
 
-export function PageHeader({
-  title,
-  description,
-  icon: Icon,
-  actions,
-}: {
-  title: string;
-  description?: string;
-  icon?: typeof BookMarked;
-  actions?: React.ReactNode;
-}) {
-  return (
-    <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
-      <div className="flex items-start gap-3">
-        {Icon ? (
-          <span className="mt-1 flex h-9 w-9 items-center justify-center rounded-md bg-secondary text-foreground">
-            <Icon className="h-4 w-4" />
-          </span>
-        ) : null}
-        <div>
-          <h1 className="font-serif text-2xl font-semibold tracking-tight md:text-3xl">
-            {title}
-          </h1>
-          {description ? (
-            <p className="mt-1 text-sm text-muted-foreground text-balance">
-              {description}
-            </p>
-          ) : null}
-        </div>
-      </div>
-      {actions ? <div className="flex shrink-0 items-center gap-2">{actions}</div> : null}
-    </div>
-  );
-}
