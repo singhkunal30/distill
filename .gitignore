@@ -28,6 +28,11 @@ uploads/
 # Generated audio
 public/audio/
 
+# Demo fixtures are produced by `npm run seed` against the freshly
+# generated book IDs. They're machine-local and can't be portable.
+lib/demo/fixtures/*.json
+!lib/demo/fixtures/.gitkeep
+
 # Logs
 *.log
 npm-debug.log*
