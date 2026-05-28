@@ -4,11 +4,20 @@
 // mode will surface in later phases, and seeds a few achievements.
 //
 // Run via: npm run seed
-// Safe to re-run; uses upsert by `title`.
+// Safe to re-run; wipes Book/BookGenre/Achievement/ReadingEvent first
+// (but preserves Settings).
+
+// `tsx` doesn't auto-load .env the way `next` does, so do it here.
+// Default to ./prisma/distill.db if no .env exists yet — keeps the
+// first-run experience friction-free.
+import 'dotenv/config';
+if (!process.env.DATABASE_URL) {
+  process.env.DATABASE_URL = 'file:./distill.db';
+}
 
 import { PrismaClient } from '@prisma/client';
-import { writeFileSync, mkdirSync, existsSync } from 'node:fs';
-import path from 'node:path';
+import { writeFileSync, mkdirSync, existsSync } from 'fs';
+import path from 'path';
 
 const prisma = new PrismaClient();
 

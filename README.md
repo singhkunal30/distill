@@ -18,18 +18,26 @@ mobile-first PWA shell). Phases 2–7 land iteratively. See
 # 1. Install deps & generate the Prisma client.
 npm install
 
-# 2. Create the SQLite database from the schema.
-DATABASE_URL="file:./distill.db" npx prisma db push
+# 2. Create your .env from the template.
+cp .env.example .env
 
-# 3. Seed 10 sample books, demo fixtures, achievements.
+# 3. Create the SQLite database from the schema.
+npm run db:push
+
+# 4. Seed 10 sample books, demo fixtures, achievements.
 npm run seed
 
-# 4. Run the app.
+# 5. Run the app.
 npm run dev
 ```
 
 Open <http://localhost:3000>. The first launch shows a 3-screen
 onboarding; afterward you land on Home.
+
+> The `.env` only needs `DATABASE_URL` set for Distill to boot — and
+> the template already has a working default (`file:./distill.db`).
+> AI keys are optional and only required when you switch off demo
+> mode in Settings.
 
 ## API keys (optional)
 
