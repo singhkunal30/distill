@@ -10,6 +10,7 @@ import {
 } from 'react-native';
 import { Link, useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { Ionicons } from '@expo/vector-icons';
 import { useQuery } from '@tanstack/react-query';
 import { api, ApiError } from '@/lib/api';
 import { BookCover } from '@/components/book-cover';
@@ -75,6 +76,13 @@ export default function LibraryScreen() {
 
   return (
     <SafeAreaView className={`flex-1 ${dark ? 'bg-background-dark' : 'bg-background'}`} edges={['top']}>
+      <Pressable
+        onPress={() => router.push('/add-book' as never)}
+        className="absolute right-5 bottom-5 z-10 h-14 w-14 items-center justify-center rounded-full bg-accent shadow-lg"
+        style={{ elevation: 6 }}
+      >
+        <Ionicons name="add" size={28} color="#11161f" />
+      </Pressable>
       <FlatList
         data={data.books}
         keyExtractor={(b) => b.id}

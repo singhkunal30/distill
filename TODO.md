@@ -5,42 +5,40 @@ next step** so future-me (or future-Claude) can pick it up cold.
 
 ---
 
-## 🟡 Mobile pivot (in progress)
+## 🟢 Mobile (Phase 1–4 parity, demo-mode ready)
 
-Distill is now a dual-client app. The server (this repo's root) stays
-as-is and exposes `/api/*`. A new `mobile/` directory holds the Expo
-client.
+The web app and mobile app are now feature-equivalent for the
+flows that matter day to day. Mobile is built on Expo Router +
+NativeWind + TanStack Query + SecureStore, talks to the same Next.js
+backend, and authenticates via Bearer token.
 
 Done:
-- Bearer-token auth in `lib/auth.ts` + middleware. The web cookie still
-  works for the existing UI; mobile reads `token` from
-  `POST /api/auth/login` and sends `Authorization: Bearer <token>`.
-- CORS preflight + origin reflection on all `/api/*` routes (passcode
-  remains the real boundary).
-- New API endpoints for the mobile client: `/api/library`,
-  `/api/books/[id]`, `/api/summaries/[id]`.
-- Expo scaffold under `mobile/`:
-  - Expo Router (file-based, mirrors Next.js feel).
-  - NativeWind for Tailwind-style styling.
-  - TanStack Query for server state.
-  - SecureStore for the bearer token.
-  - Screens working today: login, library list + currently-reading row,
-    book detail with summary list, reader (light / sepia / dark themes,
-    font scale).
-  - Stub tabs: review, settings (sign-out works).
+- Server: Bearer-token auth, CORS preflight + origin reflection on
+  `/api/*`, and a mobile-shaped REST surface — `/api/library`,
+  `/api/books`, `/api/books/[id]`, `/api/books/openlibrary`,
+  `/api/summaries`, `/api/summaries/[id]`, `/api/tts`,
+  `/api/audio/queue`, `/api/playback`, `/api/flashcards`,
+  `/api/flashcards/[id]/review`, `/api/quizzes`, `/api/quizzes/[id]`,
+  `/api/highlights`, `/api/highlights/[id]`, `/api/jobs`.
+- Mobile screens: Login, Library + currently-reading carousel + FAB
+  → Add Book, Add Book (Open Library search + paste text),
+  Book detail (Distill + Listen + JobProgress + flashcard / quiz /
+  highlights actions), Reader (light/sepia/dark + long-press →
+  highlight), Review (full SM-2 deck), Quiz runner, Highlights list,
+  Settings (sign-out).
+- Audio: persistent mini-bar + expanded sheet, `expo-av` for MP3,
+  `expo-speech` for the text fallback (demo mode). Real iOS
+  background playback configured via the audio mode.
 
-Mobile pending — same screens as web but in RN:
-- [ ] Add Book (Open Library search, paste text). EPUB/PDF upload via
-  expo-document-picker — defer; web already covers it.
-- [ ] Distill dialog with format picker + cost confirmation.
-- [ ] Audio player using expo-av + expo-speech (real background
-  playback on iOS via the audio mode, unlike Safari PWA).
-- [ ] Review deck (SM-2 quality buttons).
-- [ ] Quiz runner.
-- [ ] Highlight overlay (selectable text + a long-press handler).
-- [ ] EAS Build config for TestFlight / Play Store.
-- [ ] Production deployment of the server (Vercel / Render) so the app
-  works over HTTPS without LAN.
+Still pending:
+- [ ] EPUB/PDF upload in mobile via `expo-document-picker` (web
+  already handles it; defer until needed).
+- [ ] Section-level editing + regenerate inside the mobile reader
+  (web has it).
+- [ ] EAS Build config (`eas.json`) for TestFlight / Play Internal
+  Testing.
+- [ ] Production deployment of the server (Vercel / Render / Fly) so
+  the mobile app works over HTTPS without LAN access.
 
 ---
 

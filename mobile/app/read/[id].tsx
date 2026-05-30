@@ -6,38 +6,26 @@ import {
   Pressable,
   ActivityIndicator,
   useColorScheme,
+  Alert,
 } from 'react-native';
 import { useLocalSearchParams, useRouter, Stack } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { api } from '@/lib/api';
+import { ListenButton } from '@/features/audio/listen-button';
 import type { SummaryResponse } from '@/lib/types';
 
-const THEME_LIGHT = {
-  bg: '#f7f2e8',
-  text: '#1a2236',
-  muted: '#6b6a5f',
-  border: '#d8cdb7',
-};
-const THEME_DARK = {
-  bg: '#11161f',
-  text: '#efe5d2',
-  muted: '#9da3b3',
-  border: '#2a3245',
-};
-const THEME_SEPIA = {
-  bg: '#efe5d2',
-  text: '#3a2c20',
-  muted: '#7a6651',
-  border: '#cdbf9e',
-};
+const THEME_LIGHT = { bg: '#f7f2e8', text: '#1a2236', muted: '#6b6a5f', border: '#d8cdb7' };
+const THEME_DARK = { bg: '#11161f', text: '#efe5d2', muted: '#9da3b3', border: '#2a3245' };
+const THEME_SEPIA = { bg: '#efe5d2', text: '#3a2c20', muted: '#7a6651', border: '#cdbf9e' };
 
 type Theme = 'light' | 'dark' | 'sepia';
 
 export default function ReaderScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
+  const qc = useQueryClient();
   const scheme = useColorScheme();
   const [theme, setTheme] = React.useState<Theme>(scheme === 'dark' ? 'dark' : 'sepia');
   const [scale, setScale] = React.useState(1);
@@ -50,6 +38,17 @@ export default function ReaderScreen() {
     enabled: Boolean(id),
   });
 
+  const highlight = useMutation({
+    mutationFn: (input: { bookId: string; text: string; locator: string }) =>
+      api('/api/highlights', { method: 'POST', body: input }),
+    onSuccess: () => {
+      if (query.data) {
+        qc.invalidateQueries({ queryKey: ['book', query.data.summary.book.id] });
+        qc.invalidateQueries({ queryKey: ['highlights', query.data.summary.book.id] });
+      }
+    },
+  });
+
   if (query.isLoading) {
     return (
       <View style={{ flex: 1, backgroundColor: palette.bg, alignItems: 'center', justifyContent: 'center' }}>
@@ -57,7 +56,6 @@ export default function ReaderScreen() {
       </View>
     );
   }
-
   if (query.error || !query.data) {
     return (
       <View style={{ flex: 1, backgroundColor: palette.bg, alignItems: 'center', justifyContent: 'center', padding: 24 }}>
@@ -71,6 +69,26 @@ export default function ReaderScreen() {
 
   const cycleTheme = () => {
     setTheme((t) => (t === 'light' ? 'sepia' : t === 'sepia' ? 'dark' : 'light'));
+  };
+
+  const longPressSection = (heading: string, body: string) => {
+    Alert.alert(
+      'Save as highlight?',
+      `“${heading}: ${body.slice(0, 120)}…”`,
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Save',
+          onPress: () => {
+            highlight.mutate({
+              bookId: summary.book.id,
+              text: `${heading}. ${stripMarkdown(body)}`.trim(),
+              locator: `summary:${summary.id}`,
+            });
+          },
+        },
+      ],
+    );
   };
 
   return (
@@ -91,7 +109,8 @@ export default function ReaderScreen() {
         <Pressable onPress={() => router.back()} hitSlop={10}>
           <Ionicons name="chevron-back" size={22} color={palette.muted} />
         </Pressable>
-        <View style={{ flexDirection: 'row', gap: 14 }}>
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 14 }}>
+          <ListenButton summaryId={summary.id} small />
           <Pressable onPress={() => setScale((s) => Math.max(0.85, +(s - 0.05).toFixed(2)))} hitSlop={10}>
             <Ionicons name="remove-circle-outline" size={22} color={palette.muted} />
           </Pressable>
@@ -109,7 +128,7 @@ export default function ReaderScreen() {
       </View>
 
       <ScrollView
-        contentContainerStyle={{ paddingHorizontal: 24, paddingTop: 24, paddingBottom: 48 }}
+        contentContainerStyle={{ paddingHorizontal: 24, paddingTop: 24, paddingBottom: 140 }}
       >
         <Text style={{ color: palette.muted, fontSize: 11, letterSpacing: 1.5, textTransform: 'uppercase' }}>
           {summary.format}
@@ -132,8 +151,30 @@ export default function ReaderScreen() {
           </Text>
         ) : null}
 
+        <Text
+          style={{
+            color: palette.muted,
+            fontSize: 11,
+            marginTop: 8,
+            fontStyle: 'italic',
+          }}
+        >
+          Long-press a section to save it as a highlight.
+        </Text>
+
         {summary.sections.map((s) => (
-          <View key={s.id} style={{ marginTop: 32, paddingTop: 24, borderTopWidth: 1, borderColor: palette.border }}>
+          <Pressable
+            key={s.id}
+            onLongPress={() => longPressSection(s.heading, s.body)}
+            delayLongPress={400}
+            style={({ pressed }) => ({
+              marginTop: 32,
+              paddingTop: 24,
+              borderTopWidth: 1,
+              borderColor: palette.border,
+              opacity: pressed ? 0.75 : 1,
+            })}
+          >
             <Text
               style={{
                 color: palette.muted,
@@ -168,7 +209,7 @@ export default function ReaderScreen() {
             >
               {stripMarkdown(s.body)}
             </Text>
-          </View>
+          </Pressable>
         ))}
 
         <Text style={{ color: palette.muted, fontSize: 12, textAlign: 'center', marginTop: 40 }}>
@@ -188,9 +229,6 @@ function parseAuthors(json: string): string[] {
   }
 }
 
-// Mobile reader doesn't render full markdown yet. Strip the most common
-// markers so the body reads cleanly. Full markdown support lands in the
-// next pass alongside an `expo-markdown-display` integration.
 function stripMarkdown(md: string): string {
   return md
     .replace(/\*\*([^*]+)\*\*/g, '$1')

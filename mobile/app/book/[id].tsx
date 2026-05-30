@@ -6,13 +6,17 @@ import {
   Pressable,
   ActivityIndicator,
   useColorScheme,
+  Alert,
 } from 'react-native';
 import { useLocalSearchParams, useRouter, Stack } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
-import { useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { api } from '@/lib/api';
 import { BookCover } from '@/components/book-cover';
+import { JobProgress } from '@/components/job-progress';
+import { DistillButton } from '@/features/summaries/distill-button';
+import { ListenButton } from '@/features/audio/listen-button';
 import type { BookDetailResponse } from '@/lib/types';
 
 const FORMAT_LABEL: Record<string, string> = {
@@ -26,6 +30,7 @@ const FORMAT_LABEL: Record<string, string> = {
 export default function BookDetail() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
+  const qc = useQueryClient();
   const scheme = useColorScheme();
   const dark = scheme === 'dark';
 
@@ -33,6 +38,17 @@ export default function BookDetail() {
     queryKey: ['book', id],
     queryFn: () => api<BookDetailResponse>(`/api/books/${id}`),
     enabled: Boolean(id),
+  });
+
+  const genCards = useMutation({
+    mutationFn: () =>
+      api<{ jobId: string }>('/api/flashcards', { method: 'POST', body: { bookId: id } }),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['book', id] }),
+  });
+  const genQuiz = useMutation({
+    mutationFn: () =>
+      api<{ jobId: string }>('/api/quizzes', { method: 'POST', body: { bookId: id } }),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['book', id] }),
   });
 
   if (query.isLoading) {
@@ -59,6 +75,8 @@ export default function BookDetail() {
 
   const { book, summaries, flashcardCount, flashcardsDue, quizCount, highlightCount } =
     query.data;
+  const hasSummary = summaries.length > 0;
+  const firstSummary = summaries[0] ?? null;
 
   return (
     <SafeAreaView
@@ -66,7 +84,7 @@ export default function BookDetail() {
       edges={['top']}
     >
       <Stack.Screen options={{ headerShown: false }} />
-      <ScrollView contentContainerStyle={{ paddingBottom: 32 }}>
+      <ScrollView contentContainerStyle={{ paddingBottom: 200 }}>
         <View className="px-5 pt-3">
           <Pressable
             onPress={() => router.back()}
@@ -110,6 +128,15 @@ export default function BookDetail() {
             </Text>
           ) : null}
 
+          {/* Primary actions */}
+          <View className="mt-5 flex-row flex-wrap gap-2">
+            <DistillButton bookId={book.id} hasSummary={hasSummary} />
+            {firstSummary ? <ListenButton summaryId={firstSummary.id} /> : null}
+          </View>
+
+          <JobProgress bookId={book.id} invalidateKey={['book', id]} />
+
+          {/* Distillations */}
           <View className="mt-6">
             <Text
               className={`mb-2 text-xs uppercase tracking-wide ${dark ? 'text-mutedForeground-dark' : 'text-mutedForeground'}`}
@@ -120,7 +147,7 @@ export default function BookDetail() {
               <Text
                 className={`rounded-lg border border-dashed p-4 text-center text-sm ${dark ? 'border-border-dark text-mutedForeground-dark' : 'border-border text-mutedForeground'}`}
               >
-                No summary yet. Generate one from the web for now.
+                Tap Distill to generate one.
               </Text>
             ) : (
               <View className="gap-2">
@@ -153,10 +180,92 @@ export default function BookDetail() {
             )}
           </View>
 
-          <View className="mt-6 flex-row flex-wrap gap-2">
-            <Pill dark={dark} icon="brain-outline" label={`${flashcardsDue}/${flashcardCount} flashcards due`} />
-            <Pill dark={dark} icon="list-outline" label={`${quizCount} quiz${quizCount === 1 ? '' : 'zes'}`} />
-            <Pill dark={dark} icon="bookmark-outline" label={`${highlightCount} highlight${highlightCount === 1 ? '' : 's'}`} />
+          {/* Knowledge */}
+          <View className="mt-6">
+            <Text
+              className={`mb-2 text-xs uppercase tracking-wide ${dark ? 'text-mutedForeground-dark' : 'text-mutedForeground'}`}
+            >
+              Knowledge
+            </Text>
+            <View className="gap-2">
+              <KnowledgeRow
+                dark={dark}
+                icon="flash-outline"
+                title="Flashcards"
+                subtitle={
+                  flashcardCount === 0
+                    ? 'None yet'
+                    : `${flashcardCount} card${flashcardCount === 1 ? '' : 's'}${flashcardsDue > 0 ? ` · ${flashcardsDue} due` : ''}`
+                }
+                action={
+                  flashcardCount > 0 ? (
+                    <Pressable onPress={() => router.push('/(tabs)/review' as never)}>
+                      <Text className="text-sm text-accent">Review</Text>
+                    </Pressable>
+                  ) : (
+                    <Pressable
+                      onPress={() => {
+                        if (!hasSummary) {
+                          Alert.alert('Distill first', 'Generate a summary before flashcards.');
+                          return;
+                        }
+                        genCards.mutate();
+                      }}
+                      disabled={genCards.isPending}
+                    >
+                      {genCards.isPending ? (
+                        <ActivityIndicator size="small" />
+                      ) : (
+                        <Text className="text-sm text-accent">Generate</Text>
+                      )}
+                    </Pressable>
+                  )
+                }
+              />
+              <KnowledgeRow
+                dark={dark}
+                icon="list-outline"
+                title="Quiz"
+                subtitle={quizCount === 0 ? 'None yet' : `${quizCount} quiz${quizCount === 1 ? '' : 'zes'}`}
+                action={
+                  quizCount > 0 ? (
+                    <Pressable onPress={() => router.push(`/book/${book.id}/quiz` as never)}>
+                      <Text className="text-sm text-accent">Take</Text>
+                    </Pressable>
+                  ) : (
+                    <Pressable
+                      onPress={() => {
+                        if (!hasSummary) {
+                          Alert.alert('Distill first', 'Generate a summary before a quiz.');
+                          return;
+                        }
+                        genQuiz.mutate();
+                      }}
+                      disabled={genQuiz.isPending}
+                    >
+                      {genQuiz.isPending ? (
+                        <ActivityIndicator size="small" />
+                      ) : (
+                        <Text className="text-sm text-accent">Generate</Text>
+                      )}
+                    </Pressable>
+                  )
+                }
+              />
+              <KnowledgeRow
+                dark={dark}
+                icon="bookmark-outline"
+                title="Highlights"
+                subtitle={highlightCount === 0 ? 'None yet' : `${highlightCount}`}
+                action={
+                  <Pressable onPress={() => router.push(`/book/${book.id}/highlights` as never)}>
+                    <Text className="text-sm text-accent">
+                      {highlightCount > 0 ? 'View' : 'Read to add'}
+                    </Text>
+                  </Pressable>
+                }
+              />
+            </View>
           </View>
         </View>
       </ScrollView>
@@ -164,25 +273,33 @@ export default function BookDetail() {
   );
 }
 
-function Pill({
+function KnowledgeRow({
   dark,
   icon,
-  label,
+  title,
+  subtitle,
+  action,
 }: {
   dark: boolean;
   icon: keyof typeof import('@expo/vector-icons/build/Ionicons').glyphMap;
-  label: string;
+  title: string;
+  subtitle: string;
+  action: React.ReactNode;
 }) {
   return (
     <View
-      className={`flex-row items-center gap-2 rounded-full border px-3 py-1.5 ${dark ? 'border-border-dark bg-card-dark' : 'border-border bg-card'}`}
+      className={`flex-row items-center gap-3 rounded-lg border p-3 ${dark ? 'border-border-dark bg-card-dark' : 'border-border bg-card'}`}
     >
-      <Ionicons name={icon} size={14} color={dark ? '#9da3b3' : '#6b6a5f'} />
-      <Text
-        className={`text-xs ${dark ? 'text-foreground-dark' : 'text-foreground'}`}
-      >
-        {label}
-      </Text>
+      <Ionicons name={icon} size={20} color={dark ? '#9da3b3' : '#6b6a5f'} />
+      <View className="flex-1">
+        <Text className={`text-sm font-medium ${dark ? 'text-foreground-dark' : 'text-foreground'}`}>
+          {title}
+        </Text>
+        <Text className={`mt-0.5 text-xs ${dark ? 'text-mutedForeground-dark' : 'text-mutedForeground'}`}>
+          {subtitle}
+        </Text>
+      </View>
+      {action}
     </View>
   );
 }

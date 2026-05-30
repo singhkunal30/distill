@@ -4,13 +4,29 @@ Native iOS + Android client for Distill, built with Expo Router and
 NativeWind. The server (this repo's root) is the source of truth — the
 mobile app is just another client talking to its API.
 
-## What's wired (Phase 1 mobile)
+## What's wired
 
-- Passcode login → bearer token stored in SecureStore.
-- Library tab: list, currently-reading row, refresh-to-pull.
-- Book detail screen with summary list.
-- Reader screen with light / sepia / dark themes and font scale.
-- Stub Review and Settings tabs (sign-out works).
+- **Login** — passcode → bearer token in SecureStore.
+- **Library** — list + currently-reading carousel + pull-to-refresh.
+  Floating "+" opens Add Book.
+- **Add Book** — Open Library search and paste-text. (Demo mode runs
+  off seed fixtures; live mode hits Claude as soon as you switch off
+  demo in the web Settings.)
+- **Book detail** — Distill button (format/length/tone/audience picker
+  with cost gating server-side), Listen button, in-flight JobProgress
+  poller, Knowledge row (generate flashcards / quiz, view highlights).
+- **Reader** — light / sepia / dark themes, font scale, long-press a
+  section to save it as a highlight.
+- **Audio player** — persistent mini-bar above the tab bar, tap to
+  expand into a full sheet (speed 0.75–2x, prev/next, queue). Uses
+  `expo-av` for MP3 tracks (real iOS background playback) and
+  `expo-speech` for the browser-TTS-equivalent text fallback in demo
+  mode. Playback position autosaves every 5s.
+- **Review** — full SM-2 deck with Again/Hard/Good/Easy quality
+  buttons. Reviews sync to the same SQLite as the web /review screen.
+- **Quiz** — list per book, runner with instant feedback + explanations.
+- **Highlights** — list per book with swipe-to-delete.
+- **Settings tab** — sign out, shows the configured server URL.
 
 ## Running on your phone
 
