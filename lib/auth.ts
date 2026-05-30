@@ -1,9 +1,13 @@
-import { createHmac, timingSafeEqual } from 'node:crypto';
-import { cookies } from 'next/headers';
+import { createHmac, timingSafeEqual } from 'crypto';
+import { cookies, headers } from 'next/headers';
 import { env } from './env';
 
 const COOKIE_NAME = 'distill_session';
 const MAX_AGE_S = 60 * 60 * 24 * 30; // 30 days
+// Mobile clients (Expo) send the same signed token as a Bearer header
+// because cross-origin cookies are fiddly. The token format is identical
+// to what we put in the cookie — same HMAC, same verifier.
+const BEARER_PREFIX = 'Bearer ';
 
 export function passcodeEnabled(): boolean {
   return env.passcode != null && env.passcode.length > 0;
@@ -46,21 +50,35 @@ export function checkPasscode(input: string): boolean {
 
 export async function isAuthenticated(): Promise<boolean> {
   if (!passcodeEnabled()) return true;
-  const token = cookies().get(COOKIE_NAME)?.value;
-  if (!token) return false;
-  return verifyToken(token);
+  const cookieToken = cookies().get(COOKIE_NAME)?.value;
+  if (cookieToken && verifyToken(cookieToken)) return true;
+  // Bearer fallback for mobile / API consumers.
+  const authHeader = headers().get('authorization');
+  if (authHeader?.startsWith(BEARER_PREFIX)) {
+    const headerToken = authHeader.slice(BEARER_PREFIX.length).trim();
+    if (verifyToken(headerToken)) return true;
+  }
+  return false;
 }
 
-export async function signIn(): Promise<void> {
+/** Issue a fresh token. Mobile consumes the returned string directly;
+ * web also sets it as an HttpOnly cookie. */
+export function issueToken(): string {
+  return makeToken();
+}
+
+export async function signIn(): Promise<string> {
+  const token = makeToken();
   cookies().set({
     name: COOKIE_NAME,
-    value: makeToken(),
+    value: token,
     httpOnly: true,
     secure: process.env.NODE_ENV === 'production',
     sameSite: 'lax',
     path: '/',
     maxAge: MAX_AGE_S,
   });
+  return token;
 }
 
 export async function signOut(): Promise<void> {

@@ -2,15 +2,24 @@
 
 > The essence of every book.
 
-A personal, local-first book-summary app. Distill takes the books you read,
-extracts their essence — blink-style summaries, key insights, audio
-narration, highlights, spaced-repetition flashcards, semantic search — and
-keeps it all within reach on any device.
+A personal book-summary app. Distill takes the books you read, extracts
+their essence — blink-style summaries, key insights, audio narration,
+highlights, spaced-repetition flashcards, semantic search — and keeps it
+all within reach on any device.
 
-This repository tracks Distill across seven build phases. **Phase 1 is
-complete** (library, importers, settings, cost guardrails, brand,
-mobile-first PWA shell). Phases 2–7 land iteratively. See
-[`TODO.md`](./TODO.md) for status by phase.
+## Layout
+
+| Directory  | What it is                                                     |
+| ---------- | -------------------------------------------------------------- |
+| `.` (root) | **Server + web client** — Next.js, Prisma, job runner, all AI providers and importers. Serves the desktop UI and the `/api/*` routes. |
+| `mobile/`  | **Native iOS + Android client** — Expo Router + NativeWind. Talks to the same `/api/*` routes via Bearer token. |
+
+The server is the single source of truth: AI generation, cost
+guardrails, jobs, and the database all live there. The mobile app is a
+thin client on top — adopt-as-you-go.
+
+See [`TODO.md`](./TODO.md) for status by phase, and
+[`mobile/README.md`](./mobile/README.md) for setting up the native app.
 
 ## Quick start
 
