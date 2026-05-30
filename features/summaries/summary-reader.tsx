@@ -11,6 +11,7 @@ import { JobProgress } from './job-progress';
 import { VersionHistorySheet } from './version-history';
 import { FORMAT_LABEL } from './types';
 import { ListenButton } from '@/features/audio/listen-button';
+import { HighlightOverlay } from '@/features/highlights/highlight-overlay';
 
 type Section = { id: string; position: number; heading: string; body: string };
 
@@ -110,6 +111,8 @@ function Inner({ book, summary, versions }: Props) {
           End of {fmt.toLowerCase()}.
         </footer>
       </main>
+
+      <HighlightOverlay bookId={book.id} />
     </div>
   );
 }

@@ -88,6 +88,7 @@ export function SummarySectionBlock({ section, total, fontScale, fontFamily }: P
   return (
     <section
       id={`s-${section.id}`}
+      data-section-id={section.id}
       className="group scroll-mt-24 border-t pt-8 first:border-t-0 first:pt-0"
     >
       <div className="mb-3 flex items-start justify-between gap-3">

@@ -15,13 +15,24 @@ import { DistillDialog } from '@/features/summaries/distill-dialog';
 import { JobProgress } from '@/features/summaries/job-progress';
 import { FORMAT_LABEL, FORMAT_DESCRIPTION, type SummaryFormat } from '@/features/summaries/types';
 import { ListenButton } from '@/features/audio/listen-button';
+import { listFlashcardsForBook } from '@/features/flashcards/queries';
+import { FlashcardsSection } from '@/features/flashcards/flashcards-section';
+import { listQuizzesForBook } from '@/features/quiz/queries';
+import { QuizSection } from '@/features/quiz/quiz-section';
+import { listHighlightsForBook } from '@/features/highlights/queries';
+import { HighlightsSection } from '@/features/highlights/highlights-section';
 
 export const dynamic = 'force-dynamic';
 
 export default async function BookPage({ params }: { params: { id: string } }) {
   const [book, settings] = await Promise.all([getBook(params.id), getSettings()]);
   if (!book) notFound();
-  const summaries = await listSummaries(book.id);
+  const [summaries, flashcards, quizzes, highlights] = await Promise.all([
+    listSummaries(book.id),
+    listFlashcardsForBook(book.id),
+    listQuizzesForBook(book.id),
+    listHighlightsForBook(book.id),
+  ]);
 
   const authors = parseAuthors(book.authors);
   const sourceLabel =
@@ -154,6 +165,40 @@ export default async function BookPage({ params }: { params: { id: string } }) {
             Tip: in demo mode, every format is free and uses pre-cached fixtures.
           </p>
         ) : null}
+      </section>
+
+      <section className="mt-10">
+        <h2 className="mb-3 font-serif text-lg font-semibold">Knowledge</h2>
+        <div className="grid gap-4 md:grid-cols-3">
+          <FlashcardsSection
+            bookId={book.id}
+            cards={flashcards.map((c) => ({
+              id: c.id,
+              front: c.front,
+              back: c.back,
+              dueAt: c.dueAt,
+            }))}
+            hasSummary={summaries.length > 0}
+          />
+          <QuizSection
+            bookId={book.id}
+            quizzes={quizzes.map((q) => ({
+              id: q.id,
+              title: q.title,
+              questionCount: q._count.questions,
+              createdAt: q.createdAt,
+            }))}
+            hasSummary={summaries.length > 0}
+          />
+          <HighlightsSection
+            highlights={highlights.map((h) => ({
+              id: h.id,
+              text: h.text,
+              color: h.color,
+              createdAt: h.createdAt,
+            }))}
+          />
+        </div>
       </section>
 
       <section className="mt-10 grid gap-4 md:grid-cols-2">

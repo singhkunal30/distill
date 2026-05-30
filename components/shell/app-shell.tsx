@@ -3,10 +3,10 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import {
+  Brain,
   Home,
   Library,
   Settings,
-  Sparkles,
   TrendingUp,
 } from 'lucide-react';
 import { DistillWordmark } from '@/components/brand/wordmark';
@@ -16,7 +16,7 @@ import { cn } from '@/lib/utils';
 const NAV = [
   { href: '/', label: 'Home', icon: Home },
   { href: '/library', label: 'Library', icon: Library },
-  { href: '/discover', label: 'Discover', icon: Sparkles },
+  { href: '/review', label: 'Review', icon: Brain },
   { href: '/stats', label: 'Stats', icon: TrendingUp },
   { href: '/settings', label: 'Settings', icon: Settings },
 ] as const;

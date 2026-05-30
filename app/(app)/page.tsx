@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { ArrowRight, BookMarked, Flame, Library, Sparkles } from 'lucide-react';
+import { ArrowRight, BookMarked, Brain, Library, Sparkles } from 'lucide-react';
 import { prisma } from '@/lib/db';
 import { listBooks } from '@/features/books/queries';
 import { BookCard } from '@/features/books/book-card';
@@ -10,9 +10,10 @@ import { AddBookButton } from '@/features/books/add-book-dialog';
 import { getBudgetStatus } from '@/lib/ai/budget';
 import { formatUsd } from '@/lib/utils';
 import { getSettings } from '@/lib/settings';
+import { countDueFlashcards } from '@/features/flashcards/queries';
 
 export default async function HomePage() {
-  const [books, settings, budget, jobs] = await Promise.all([
+  const [books, settings, budget, jobs, dueCount] = await Promise.all([
     listBooks(),
     getSettings(),
     getBudgetStatus(),
@@ -21,6 +22,7 @@ export default async function HomePage() {
       orderBy: { createdAt: 'desc' },
       take: 5,
     }),
+    countDueFlashcards(),
   ]);
 
   const reading = books.filter((b) => b.status === 'reading').slice(0, 6);
@@ -49,10 +51,10 @@ export default async function HomePage() {
           hint="lifetime"
         />
         <StatCard
-          icon={Flame}
-          label="Streak"
-          value="—"
-          hint="Phase 6"
+          icon={Brain}
+          label="Due to review"
+          value={dueCount.toString()}
+          hint={dueCount > 0 ? 'go to Review' : 'caught up'}
         />
         <StatCard
           icon={Sparkles}

@@ -3,13 +3,17 @@ import type { JobContext, JobHandler, JobKind } from './types';
 import { runSummaryJob } from './handlers/summary';
 import { runSectionRegenerateJob } from './handlers/section-regenerate';
 import { runTtsJob } from './handlers/tts';
+import { runFlashcardsJob } from './handlers/flashcards';
+import { runQuizJob } from './handlers/quiz';
 
 const HANDLERS: Partial<Record<JobKind, JobHandler>> = {
   summary: runSummaryJob,
   section_regenerate: runSectionRegenerateJob,
   tts: runTtsJob,
-  // Other kinds (embedding, quiz, flashcards, recommendation_index)
-  // arrive in later phases. The dispatcher errors loudly if asked for one.
+  flashcards: runFlashcardsJob,
+  quiz: runQuizJob,
+  // Other kinds (embedding, recommendation_index) arrive in later
+  // phases. The dispatcher errors loudly if asked for one.
 };
 
 const LEASE_MS = 60_000; // 60s lease; stale leases are reclaimed.
