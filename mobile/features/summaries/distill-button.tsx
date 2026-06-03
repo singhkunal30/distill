@@ -58,7 +58,7 @@ export function DistillButton({
         onPress={() => setOpen(true)}
         className="flex-row items-center gap-2 rounded-full bg-accent px-4 py-2"
       >
-        <Ionicons name="sparkles" size={16} color="#11161f" />
+        <Ionicons name="sparkles" size={16} color="#1a1816" />
         <Text className="text-sm font-medium text-foreground">
           {hasSummary ? 'Distill again' : 'Distill'}
         </Text>
@@ -68,7 +68,7 @@ export function DistillButton({
         <View className={`flex-1 px-6 pt-4 ${dark ? 'bg-background-dark' : 'bg-background'}`}>
           <View className="mb-4 flex-row items-center justify-between">
             <Pressable onPress={() => setOpen(false)} hitSlop={10}>
-              <Ionicons name="close" size={24} color={dark ? '#efe5d2' : '#1a2236'} />
+              <Ionicons name="close" size={24} color={dark ? '#efeae0' : '#1f1c18'} />
             </Pressable>
             <Text
               className={`font-serif text-lg font-semibold ${dark ? 'text-foreground-dark' : 'text-foreground'}`}
@@ -105,7 +105,7 @@ export function DistillButton({
                   </Text>
                 </View>
                 {format === f.value ? (
-                  <Ionicons name="checkmark-circle" size={20} color="#f4a72c" />
+                  <Ionicons name="checkmark-circle" size={20} color="#c2693d" />
                 ) : null}
               </Pressable>
             ))}
@@ -145,7 +145,7 @@ export function DistillButton({
             className="h-12 items-center justify-center rounded-lg bg-accent"
           >
             {enqueue.isPending ? (
-              <ActivityIndicator color="#11161f" />
+              <ActivityIndicator color="#1a1816" />
             ) : (
               <Text className="font-medium text-foreground">Start</Text>
             )}

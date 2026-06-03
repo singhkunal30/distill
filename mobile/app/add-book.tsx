@@ -34,7 +34,7 @@ export default function AddBookScreen() {
       <Stack.Screen options={{ headerShown: false }} />
       <View className="flex-row items-center justify-between px-4 py-3">
         <Pressable onPress={() => router.back()} hitSlop={10}>
-          <Ionicons name="close" size={24} color={dark ? '#efe5d2' : '#1a2236'} />
+          <Ionicons name="close" size={24} color={dark ? '#efeae0' : '#1f1c18'} />
         </Pressable>
         <Text className={`font-serif text-lg font-semibold ${dark ? 'text-foreground-dark' : 'text-foreground'}`}>
           Add book
@@ -118,13 +118,13 @@ function SearchPanel({ dark }: { dark: boolean }) {
       <View
         className={`flex-row items-center gap-2 rounded-lg border px-3 ${dark ? 'border-border-dark bg-card-dark' : 'border-border bg-card'}`}
       >
-        <Ionicons name="search" size={16} color={dark ? '#9da3b3' : '#6b6a5f'} />
+        <Ionicons name="search" size={16} color={dark ? '#a8a39a' : '#6b6760'} />
         <TextInput
           value={query}
           onChangeText={setQuery}
           onSubmitEditing={run}
           placeholder="Title, author, ISBN…"
-          placeholderTextColor={dark ? '#6b6a5f' : '#9da3b3'}
+          placeholderTextColor={dark ? '#6b6760' : '#a8a39a'}
           returnKeyType="search"
           autoCapitalize="none"
           autoCorrect={false}
@@ -151,7 +151,7 @@ function SearchPanel({ dark }: { dark: boolean }) {
             {item.coverUrl ? (
               <Image source={{ uri: item.coverUrl }} style={{ width: 44, height: 64, borderRadius: 4 }} />
             ) : (
-              <View style={{ width: 44, height: 64, borderRadius: 4, backgroundColor: '#d8cdb7' }} />
+              <View style={{ width: 44, height: 64, borderRadius: 4, backgroundColor: '#ddd5c4' }} />
             )}
             <View className="flex-1">
               <Text
@@ -177,7 +177,7 @@ function SearchPanel({ dark }: { dark: boolean }) {
               className="rounded-full bg-accent px-4 py-1.5"
             >
               {addMutation.isPending && addingKey === item.openLibraryId ? (
-                <ActivityIndicator size="small" color="#11161f" />
+                <ActivityIndicator size="small" color="#1a1816" />
               ) : (
                 <Text className="text-sm font-medium text-foreground">Add</Text>
               )}
@@ -224,21 +224,21 @@ function PastePanel({ dark }: { dark: boolean }) {
         value={title}
         onChangeText={setTitle}
         placeholder="Title"
-        placeholderTextColor={dark ? '#6b6a5f' : '#9da3b3'}
+        placeholderTextColor={dark ? '#6b6760' : '#a8a39a'}
         className={`mb-2 h-11 rounded-lg border px-3 text-base ${dark ? 'border-border-dark bg-card-dark text-foreground-dark' : 'border-border bg-card text-foreground'}`}
       />
       <TextInput
         value={authors}
         onChangeText={setAuthors}
         placeholder="Authors (comma-separated)"
-        placeholderTextColor={dark ? '#6b6a5f' : '#9da3b3'}
+        placeholderTextColor={dark ? '#6b6760' : '#a8a39a'}
         className={`mb-2 h-11 rounded-lg border px-3 text-base ${dark ? 'border-border-dark bg-card-dark text-foreground-dark' : 'border-border bg-card text-foreground'}`}
       />
       <TextInput
         value={body}
         onChangeText={setBody}
         placeholder="Paste markdown or plain text…"
-        placeholderTextColor={dark ? '#6b6a5f' : '#9da3b3'}
+        placeholderTextColor={dark ? '#6b6760' : '#a8a39a'}
         multiline
         textAlignVertical="top"
         className={`mb-3 flex-1 rounded-lg border p-3 text-base ${dark ? 'border-border-dark bg-card-dark text-foreground-dark' : 'border-border bg-card text-foreground'}`}
@@ -249,7 +249,7 @@ function PastePanel({ dark }: { dark: boolean }) {
         className="mb-4 h-12 items-center justify-center rounded-lg bg-accent disabled:opacity-50"
       >
         {pending ? (
-          <ActivityIndicator color="#11161f" />
+          <ActivityIndicator color="#1a1816" />
         ) : (
           <Text className="font-medium text-foreground">Add to library</Text>
         )}

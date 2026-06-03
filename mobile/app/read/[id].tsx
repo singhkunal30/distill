@@ -16,8 +16,8 @@ import { api } from '@/lib/api';
 import { ListenButton } from '@/features/audio/listen-button';
 import type { SummaryResponse } from '@/lib/types';
 
-const THEME_LIGHT = { bg: '#f7f2e8', text: '#1a2236', muted: '#6b6a5f', border: '#d8cdb7' };
-const THEME_DARK = { bg: '#11161f', text: '#efe5d2', muted: '#9da3b3', border: '#2a3245' };
+const THEME_LIGHT = { bg: '#f7f4ec', text: '#1f1c18', muted: '#6b6760', border: '#ddd5c4' };
+const THEME_DARK = { bg: '#1a1816', text: '#efeae0', muted: '#a8a39a', border: '#3a342f' };
 const THEME_SEPIA = { bg: '#efe5d2', text: '#3a2c20', muted: '#7a6651', border: '#cdbf9e' };
 
 type Theme = 'light' | 'dark' | 'sepia';

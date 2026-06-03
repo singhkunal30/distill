@@ -56,7 +56,7 @@ export default function LoginScreen() {
       >
         <View className="flex-1 px-8 pt-16">
           <View className="flex-row items-center gap-3">
-            <Droplet size={32} color={dark ? '#f0a634' : '#11161f'} />
+            <Droplet size={32} color={dark ? '#cf7950' : '#1a1816'} />
             <Text
               className={`font-serif text-2xl font-semibold ${dark ? 'text-foreground-dark' : 'text-foreground'}`}
             >
@@ -80,7 +80,7 @@ export default function LoginScreen() {
               value={passcode}
               onChangeText={setPasscode}
               placeholder="Passcode"
-              placeholderTextColor={dark ? '#6b6a5f' : '#9da3b3'}
+              placeholderTextColor={dark ? '#6b6760' : '#a8a39a'}
               secureTextEntry
               autoFocus
               autoCapitalize="none"
@@ -97,7 +97,7 @@ export default function LoginScreen() {
               className="h-12 items-center justify-center rounded-lg bg-accent"
             >
               {pending ? (
-                <ActivityIndicator color="#11161f" />
+                <ActivityIndicator color="#1a1816" />
               ) : (
                 <Text className="font-medium text-foreground">Unlock</Text>
               )}

@@ -2,7 +2,7 @@ import * as React from 'react';
 import Svg, { Path } from 'react-native-svg';
 
 // Distill droplet mark. Same shape as the web wordmark.
-export function Droplet({ size = 28, color = '#11161f' }: { size?: number; color?: string }) {
+export function Droplet({ size = 28, color = '#1a1816' }: { size?: number; color?: string }) {
   return (
     <Svg width={size} height={size} viewBox="0 0 32 32" fill="none">
       <Path

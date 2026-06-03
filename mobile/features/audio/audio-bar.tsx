@@ -43,7 +43,7 @@ export function AudioBar() {
       >
         <View className="flex-row items-center gap-3">
           <View className="h-10 w-10 items-center justify-center rounded-md bg-accent/20">
-            <Ionicons name="headset-outline" size={18} color="#f4a72c" />
+            <Ionicons name="headset-outline" size={18} color="#c2693d" />
           </View>
           <View className="flex-1">
             <Text
@@ -66,7 +66,7 @@ export function AudioBar() {
             }}
             hitSlop={10}
           >
-            <Ionicons name="play-skip-back" size={20} color={dark ? '#efe5d2' : '#1a2236'} />
+            <Ionicons name="play-skip-back" size={20} color={dark ? '#efeae0' : '#1f1c18'} />
           </Pressable>
           <Pressable
             onPress={(e) => {
@@ -76,7 +76,7 @@ export function AudioBar() {
             hitSlop={10}
             className="h-9 w-9 items-center justify-center rounded-full bg-accent"
           >
-            <Ionicons name={playing ? 'pause' : 'play'} size={18} color="#11161f" />
+            <Ionicons name={playing ? 'pause' : 'play'} size={18} color="#1a1816" />
           </Pressable>
           <Pressable
             onPress={(e) => {
@@ -85,7 +85,7 @@ export function AudioBar() {
             }}
             hitSlop={10}
           >
-            <Ionicons name="play-skip-forward" size={20} color={dark ? '#efe5d2' : '#1a2236'} />
+            <Ionicons name="play-skip-forward" size={20} color={dark ? '#efeae0' : '#1f1c18'} />
           </Pressable>
         </View>
       </Pressable>
@@ -95,7 +95,7 @@ export function AudioBar() {
         <View className={`flex-1 px-6 pt-4 ${dark ? 'bg-background-dark' : 'bg-background'}`}>
           <View className="mb-2 flex-row items-center justify-between">
             <Pressable onPress={() => setExpanded(false)} hitSlop={10}>
-              <Ionicons name="chevron-down" size={24} color={dark ? '#efe5d2' : '#1a2236'} />
+              <Ionicons name="chevron-down" size={24} color={dark ? '#efeae0' : '#1f1c18'} />
             </Pressable>
             <Text
               className={`text-xs uppercase tracking-wide ${dark ? 'text-mutedForeground-dark' : 'text-mutedForeground'}`}
@@ -103,13 +103,13 @@ export function AudioBar() {
               Now playing
             </Text>
             <Pressable onPress={clear} hitSlop={10}>
-              <Ionicons name="close" size={24} color={dark ? '#efe5d2' : '#1a2236'} />
+              <Ionicons name="close" size={24} color={dark ? '#efeae0' : '#1f1c18'} />
             </Pressable>
           </View>
 
           <View className="flex-1 items-center justify-center">
             <View className="h-40 w-40 items-center justify-center rounded-2xl bg-accent/20">
-              <Ionicons name="headset" size={64} color="#f4a72c" />
+              <Ionicons name="headset" size={64} color="#c2693d" />
             </View>
             <Text
               className={`mt-6 text-center font-serif text-2xl font-semibold ${dark ? 'text-foreground-dark' : 'text-foreground'}`}
@@ -125,16 +125,16 @@ export function AudioBar() {
 
           <View className="my-4 flex-row items-center justify-center gap-6">
             <Pressable onPress={prev} hitSlop={10}>
-              <Ionicons name="play-skip-back" size={32} color={dark ? '#efe5d2' : '#1a2236'} />
+              <Ionicons name="play-skip-back" size={32} color={dark ? '#efeae0' : '#1f1c18'} />
             </Pressable>
             <Pressable
               onPress={togglePlay}
               className="h-16 w-16 items-center justify-center rounded-full bg-accent"
             >
-              <Ionicons name={playing ? 'pause' : 'play'} size={32} color="#11161f" />
+              <Ionicons name={playing ? 'pause' : 'play'} size={32} color="#1a1816" />
             </Pressable>
             <Pressable onPress={next} hitSlop={10}>
-              <Ionicons name="play-skip-forward" size={32} color={dark ? '#efe5d2' : '#1a2236'} />
+              <Ionicons name="play-skip-forward" size={32} color={dark ? '#efeae0' : '#1f1c18'} />
             </Pressable>
           </View>
 

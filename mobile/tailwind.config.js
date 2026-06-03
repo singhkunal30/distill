@@ -5,36 +5,37 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        // Mirror the web app's HSL tokens, hard-coded for RN (no CSS vars).
+        // Mirror lib/theme.ts. NativeWind doesn't read CSS variables, so
+        // colors are hard-coded here; update both files together.
         background: {
-          DEFAULT: '#f7f2e8',
-          dark: '#11161f',
+          DEFAULT: '#f7f4ec',
+          dark: '#1a1816',
           sepia: '#efe5d2',
         },
         foreground: {
-          DEFAULT: '#1a2236',
-          dark: '#efe5d2',
+          DEFAULT: '#1f1c18',
+          dark: '#efeae0',
           sepia: '#3a2c20',
         },
         card: {
-          DEFAULT: '#fbf6ec',
-          dark: '#161d2a',
+          DEFAULT: '#fbf8f0',
+          dark: '#221f1c',
         },
         muted: {
-          DEFAULT: '#e6dccb',
-          dark: '#23293a',
+          DEFAULT: '#ece5d4',
+          dark: '#2a2624',
         },
         mutedForeground: {
-          DEFAULT: '#6b6a5f',
-          dark: '#9da3b3',
+          DEFAULT: '#6b6760',
+          dark: '#a8a39a',
         },
         accent: {
-          DEFAULT: '#f4a72c',
-          dark: '#f0a634',
+          DEFAULT: '#c2693d',
+          dark: '#cf7950',
         },
         border: {
-          DEFAULT: '#d8cdb7',
-          dark: '#2a3245',
+          DEFAULT: '#ddd5c4',
+          dark: '#3a342f',
         },
         destructive: {
           DEFAULT: '#b91c1c',

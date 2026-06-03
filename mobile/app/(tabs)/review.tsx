@@ -14,9 +14,9 @@ import type { DueCard } from '@/lib/types';
 
 const QUALITY: { label: string; quality: number; hint: string; color: string }[] = [
   { label: 'Again', quality: 0, hint: 'I forgot it', color: '#b91c1c' },
-  { label: 'Hard', quality: 3, hint: 'With effort', color: '#6b6a5f' },
-  { label: 'Good', quality: 4, hint: 'Got it', color: '#1a2236' },
-  { label: 'Easy', quality: 5, hint: 'Trivial', color: '#f4a72c' },
+  { label: 'Hard', quality: 3, hint: 'With effort', color: '#6b6760' },
+  { label: 'Good', quality: 4, hint: 'Got it', color: '#1f1c18' },
+  { label: 'Easy', quality: 5, hint: 'Trivial', color: '#c2693d' },
 ];
 
 export default function ReviewScreen() {
@@ -76,7 +76,7 @@ export default function ReviewScreen() {
       >
         <View className="flex-1 items-center justify-center px-8">
           <View className="h-14 w-14 items-center justify-center rounded-full bg-accent/20">
-            <Ionicons name="checkmark" size={28} color="#f4a72c" />
+            <Ionicons name="checkmark" size={28} color="#c2693d" />
           </View>
           <Text
             className={`mt-4 font-serif text-2xl font-semibold ${dark ? 'text-foreground-dark' : 'text-foreground'}`}

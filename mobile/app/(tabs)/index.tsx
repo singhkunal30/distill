@@ -81,7 +81,7 @@ export default function LibraryScreen() {
         className="absolute right-5 bottom-5 z-10 h-14 w-14 items-center justify-center rounded-full bg-accent shadow-lg"
         style={{ elevation: 6 }}
       >
-        <Ionicons name="add" size={28} color="#11161f" />
+        <Ionicons name="add" size={28} color="#1a1816" />
       </Pressable>
       <FlatList
         data={data.books}

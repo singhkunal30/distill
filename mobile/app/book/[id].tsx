@@ -90,7 +90,7 @@ export default function BookDetail() {
             onPress={() => router.back()}
             className="mb-4 flex-row items-center gap-1 active:opacity-70"
           >
-            <Ionicons name="chevron-back" size={18} color={dark ? '#9da3b3' : '#6b6a5f'} />
+            <Ionicons name="chevron-back" size={18} color={dark ? '#a8a39a' : '#6b6760'} />
             <Text className={dark ? 'text-mutedForeground-dark' : 'text-mutedForeground'}>
               Library
             </Text>
@@ -172,7 +172,7 @@ export default function BookDetail() {
                     <Ionicons
                       name="chevron-forward"
                       size={16}
-                      color={dark ? '#9da3b3' : '#6b6a5f'}
+                      color={dark ? '#a8a39a' : '#6b6760'}
                     />
                   </Pressable>
                 ))}
@@ -290,7 +290,7 @@ function KnowledgeRow({
     <View
       className={`flex-row items-center gap-3 rounded-lg border p-3 ${dark ? 'border-border-dark bg-card-dark' : 'border-border bg-card'}`}
     >
-      <Ionicons name={icon} size={20} color={dark ? '#9da3b3' : '#6b6a5f'} />
+      <Ionicons name={icon} size={20} color={dark ? '#a8a39a' : '#6b6760'} />
       <View className="flex-1">
         <Text className={`text-sm font-medium ${dark ? 'text-foreground-dark' : 'text-foreground'}`}>
           {title}

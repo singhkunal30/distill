@@ -40,7 +40,7 @@ export default function QuizListScreen() {
           onPress={() => router.back()}
           className="mb-4 flex-row items-center gap-1 active:opacity-70"
         >
-          <Ionicons name="chevron-back" size={18} color={dark ? '#9da3b3' : '#6b6a5f'} />
+          <Ionicons name="chevron-back" size={18} color={dark ? '#a8a39a' : '#6b6760'} />
           <Text className={dark ? 'text-mutedForeground-dark' : 'text-mutedForeground'}>
             Book
           </Text>
@@ -76,7 +76,7 @@ export default function QuizListScreen() {
                     {q.questionCount} questions
                   </Text>
                 </View>
-                <Ionicons name="chevron-forward" size={16} color={dark ? '#9da3b3' : '#6b6a5f'} />
+                <Ionicons name="chevron-forward" size={16} color={dark ? '#a8a39a' : '#6b6760'} />
               </Pressable>
             ))}
           </View>

@@ -56,7 +56,7 @@ export default function QuizRunnerScreen() {
           onPress={() => router.back()}
           className="mb-4 flex-row items-center gap-1 active:opacity-70"
         >
-          <Ionicons name="chevron-back" size={18} color={dark ? '#9da3b3' : '#6b6a5f'} />
+          <Ionicons name="chevron-back" size={18} color={dark ? '#a8a39a' : '#6b6760'} />
           <Text className={dark ? 'text-mutedForeground-dark' : 'text-mutedForeground'}>
             Back
           </Text>
@@ -97,7 +97,7 @@ export default function QuizRunnerScreen() {
                   {q.choices.map((c, ci) => {
                     const isPicked = picked === ci;
                     let color: string | null = null;
-                    if (shown && c.correct) color = '#f4a72c';
+                    if (shown && c.correct) color = '#c2693d';
                     else if (shown && isPicked && !c.correct) color = '#b91c1c';
                     return (
                       <Pressable
@@ -108,7 +108,7 @@ export default function QuizRunnerScreen() {
                         disabled={shown}
                         className={`flex-row items-start gap-3 rounded-lg border-2 px-3 py-2`}
                         style={{
-                          borderColor: color ?? (dark ? '#2a3245' : '#d8cdb7'),
+                          borderColor: color ?? (dark ? '#3a342f' : '#ddd5c4'),
                           backgroundColor: color ? `${color}20` : 'transparent',
                         }}
                       >
@@ -124,7 +124,7 @@ export default function QuizRunnerScreen() {
                           {c.text}
                         </Text>
                         {shown && c.correct ? (
-                          <Ionicons name="checkmark" size={16} color="#f4a72c" />
+                          <Ionicons name="checkmark" size={16} color="#c2693d" />
                         ) : shown && isPicked ? (
                           <Ionicons name="close" size={16} color="#b91c1c" />
                         ) : null}

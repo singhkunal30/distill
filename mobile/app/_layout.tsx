@@ -26,7 +26,7 @@ export default function RootLayout() {
             <Stack
               screenOptions={{
                 headerShown: false,
-                contentStyle: { backgroundColor: scheme === 'dark' ? '#11161f' : '#f7f2e8' },
+                contentStyle: { backgroundColor: scheme === 'dark' ? '#1a1816' : '#f7f4ec' },
               }}
             />
             <AudioEngine />

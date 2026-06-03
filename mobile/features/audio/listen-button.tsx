@@ -57,7 +57,7 @@ export function ListenButton({
       {pending ? (
         <ActivityIndicator size="small" />
       ) : (
-        <Ionicons name="headset-outline" size={small ? 14 : 16} color="#1a2236" />
+        <Ionicons name="headset-outline" size={small ? 14 : 16} color="#1f1c18" />
       )}
       <Text className={`${small ? 'text-xs' : 'text-sm'} font-medium text-foreground`}>
         Listen

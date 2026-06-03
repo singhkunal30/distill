@@ -26,7 +26,7 @@ export function BookCover({
     return (
       <Image
         source={{ uri: url }}
-        style={{ width, height, borderRadius: 6, backgroundColor: '#d8cdb7' }}
+        style={{ width, height, borderRadius: 6, backgroundColor: '#ddd5c4' }}
       />
     );
   }
